@@ -1,0 +1,589 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Room Booking</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f2f5f9;
+            color: #222;
+        }
+
+        header {
+            background: #17365d;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        nav {
+            background: #244b75;
+            padding: 12px;
+            text-align: center;
+        }
+
+        nav button {
+            margin: 5px;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 15px;
+        }
+
+        section {
+            display: none;
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        section.active {
+            display: block;
+        }
+
+        h2 {
+            color: #17365d;
+        }
+
+        input, select {
+            padding: 10px;
+            margin: 6px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button.action {
+            background: #176b50;
+            color: white;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button.cancel {
+            background: #b42318;
+            color: white;
+        }
+
+        .rooms {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .room {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fafcff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #dce8f5;
+        }
+
+        .message {
+            margin-top: 12px;
+            color: #176b50;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #17365d;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Grand Stay Hotel</h1>
+    <p>Find and book your perfect room</p>
+</header>
+
+<nav>
+    <button onclick="showPage('home')">Home</button>
+    <button onclick="showPage('register')">Register</button>
+    <button onclick="showPage('booking')">Book Room</button>
+    <button onclick="showPage('history')">My Bookings</button>
+    <button onclick="showPage('admin')">Admin Panel</button>
+    <button onclick="showPage('contact')">Contact</button>
+</nav>
+
+<main>
+
+<section id="home" class="active">
+    <h2>Available Room Types</h2>
+    <div class="rooms" id="roomList"></div>
+    <p>Use the booking page to check availability for your dates.</p>
+</section>
+
+<section id="register">
+    <h2>User Registration</h2>
+
+    <form onsubmit="registerUser(event)">
+        <label>Full Name</label>
+        <input type="text" id="userName" required>
+
+        <label>Email</label>
+        <input type="email" id="userEmail" required>
+
+        <label>Password</label>
+        <input type="password" id="userPassword"
+               minlength="4" required>
+
+        <button class="action" type="submit">Register</button>
+    </form>
+
+    <p id="registerMessage" class="message"></p>
+</section>
+
+<section id="booking">
+    <h2>Book a Hotel Room</h2>
+
+    <form onsubmit="bookRoom(event)">
+        <label>Guest Name</label>
+        <input type="text" id="guestName" required>
+
+        <label>Room Type</label>
+        <select id="roomType" required>
+            <option value="Standard">Standard</option>
+            <option value="Deluxe">Deluxe</option>
+            <option value="Suite">Suite</option>
+            <option value="Family">Family</option>
+        </select>
+
+        <label>Check-in Date</label>
+        <input type="date" id="checkin" required>
+
+        <label>Check-out Date</label>
+        <input type="date" id="checkout" required>
+
+        <label>Number of Guests</label>
+        <input type="number" id="guests" min="1" max="6" value="1" required>
+
+        <button type="button" class="action"
+                onclick="checkAvailability()">Check Availability</button>
+
+        <button type="submit" class="action">Confirm Booking</button>
+    </form>
+
+    <p id="availabilityMessage" class="message"></p>
+    <p id="bookingMessage" class="message"></p>
+</section>
+
+<section id="history">
+    <h2>Booking History</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Guest</th>
+                <th>Room</th>
+                <th>Check-in</th>
+                <th>Check-out</th>
+                <th>Price</th>
+                <th>Status / Actions</th>
+            </tr>
+        </thead>
+        <tbody id="bookingRows"></tbody>
+    </table>
+
+    <p id="historyMessage" class="message"></p>
+    <p>Demo cancellation and modification are allowed only when
+       check-in is at least 3 days away.</p>
+</section>
+
+<section id="admin">
+    <h2>Administrator Panel</h2>
+
+    <h3>Update Room Price and Quantity</h3>
+
+    <label>Room Type</label>
+    <select id="adminRoom">
+        <option>Standard</option>
+        <option>Deluxe</option>
+        <option>Suite</option>
+        <option>Family</option>
+    </select>
+
+    <label>Price per Night (₹)</label>
+    <input type="number" id="adminPrice" min="1">
+
+    <label>Total Rooms</label>
+    <input type="number" id="adminQuantity" min="0">
+
+    <button class="action" onclick="updateRoom()">
+        Update Room Details
+    </button>
+
+    <p id="adminMessage" class="message"></p>
+
+    <h3>Manage Bookings</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Guest</th>
+                <th>Room</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="adminRows"></tbody>
+    </table>
+</section>
+
+<section id="contact">
+    <h2>Contact Us</h2>
+
+    <form onsubmit="sendContact(event)">
+        <label>Name</label>
+        <input id="contactName" required>
+
+        <label>Email</label>
+        <input type="email" id="contactEmail" required>
+
+        <label>Message</label>
+        <input id="contactText" required>
+
+        <button class="action" type="submit">Send Message</button>
+    </form>
+
+    <p id="contactMessage" class="message"></p>
+</section>
+
+</main>
+
+<footer>
+    <p>Grand Stay Hotel | Hotel Booking Demonstration</p>
+</footer>
+
+<script>
+    let rooms = {
+        Standard: { price: 1500, quantity: 5 },
+        Deluxe:   { price: 2500, quantity: 4 },
+        Suite:    { price: 4000, quantity: 2 },
+        Family:   { price: 3000, quantity: 3 }
+    };
+
+    let bookings = [];
+    let nextId = 1;
+
+    function showPage(pageId) {
+        document.querySelectorAll("main section").forEach(section => {
+            section.classList.remove("active");
+        });
+
+        document.getElementById(pageId).classList.add("active");
+    }
+
+    function renderRooms() {
+        document.getElementById("roomList").innerHTML =
+            Object.entries(rooms).map(([name, room]) => `
+                <div class="room">
+                    <h3>${name} Room</h3>
+                    <p>Price: ₹${room.price} per night</p>
+                    <p>Total rooms: ${room.quantity}</p>
+                    <button class="action"
+                        onclick="selectRoom('${name}')">Book Now</button>
+                </div>
+            `).join("");
+    }
+
+    function selectRoom(name) {
+        document.getElementById("roomType").value = name;
+        showPage("booking");
+    }
+
+    function registerUser(event) {
+        event.preventDefault();
+
+        let name = document.getElementById("userName").value;
+
+        document.getElementById("registerMessage").innerText =
+            "Registration form submitted successfully for " + name + ".";
+    }
+
+    function getDates() {
+        let start = document.getElementById("checkin").value;
+        let end = document.getElementById("checkout").value;
+
+        if (!start || !end) {
+            return null;
+        }
+
+        let startDate = new Date(start + "T00:00:00");
+        let endDate = new Date(end + "T00:00:00");
+
+        if (isNaN(startDate) || isNaN(endDate) ||
+            startDate <= new Date(new Date().toDateString()) ||
+            endDate <= startDate) {
+            return null;
+        }
+
+        return { start, end, startDate, endDate };
+    }
+
+    function isRoomAvailable(type, dates, ignoreId = null) {
+        let overlapping = bookings.filter(booking => {
+            if (booking.room !== type ||
+                booking.status !== "Confirmed" ||
+                booking.id === ignoreId) {
+                return false;
+            }
+
+            return dates.start < booking.checkout &&
+                   dates.end > booking.checkin;
+        }).length;
+
+        return overlapping < rooms[type].quantity;
+    }
+
+    function checkAvailability() {
+        let dates = getDates();
+        let type = document.getElementById("roomType").value;
+        let message = document.getElementById("availabilityMessage");
+
+        if (!dates) {
+            message.innerText =
+                "Select a future check-in date and a later check-out date.";
+            return;
+        }
+
+        message.innerText = isRoomAvailable(type, dates)
+            ? type + " room is available for the selected dates."
+            : "Sorry, no " + type + " rooms are available for those dates.";
+    }
+
+    function bookRoom(event) {
+        event.preventDefault();
+
+        let dates = getDates();
+        let type = document.getElementById("roomType").value;
+        let guests = Number(document.getElementById("guests").value);
+
+        if (!dates) {
+            document.getElementById("bookingMessage").innerText =
+                "Please enter valid future dates.";
+            return;
+        }
+
+        if (guests < 1 || guests > 6) {
+            document.getElementById("bookingMessage").innerText =
+                "Guest count must be between 1 and 6.";
+            return;
+        }
+
+        if (!isRoomAvailable(type, dates)) {
+            document.getElementById("bookingMessage").innerText =
+                "Room unavailable for the selected dates.";
+            return;
+        }
+
+        let nights = (dates.endDate - dates.startDate) / 86400000;
+        let price = nights * rooms[type].price;
+
+        bookings.push({
+            id: nextId++,
+            guest: document.getElementById("guestName").value,
+            room: type,
+            checkin: dates.start,
+            checkout: dates.end,
+            guests: guests,
+            price: price,
+            status: "Confirmed"
+        });
+
+        document.getElementById("bookingMessage").innerText =
+            "Booking confirmed! Total price: ₹" + price;
+
+        renderBookings();
+        renderAdminBookings();
+    }
+
+    function canChange(booking) {
+        let days = (new Date(booking.checkin + "T00:00:00") -
+                    new Date(new Date().toDateString())) / 86400000;
+
+        return days >= 3 && booking.status === "Confirmed";
+    }
+
+    function cancelBooking(id) {
+        let booking = bookings.find(item => item.id === id);
+
+        if (!booking || !canChange(booking)) {
+            alert("Booking can only be cancelled at least 3 days before arrival.");
+            return;
+        }
+
+        booking.status = "Cancelled";
+        renderBookings();
+        renderAdminBookings();
+    }
+
+    function modifyBooking(id) {
+        let booking = bookings.find(item => item.id === id);
+
+        if (!booking || !canChange(booking)) {
+            alert("Booking can only be changed at least 3 days before arrival.");
+            return;
+        }
+
+        let newDate = prompt("Enter new check-in date (YYYY-MM-DD):",
+                             booking.checkin);
+
+        if (!newDate) return;
+
+        let newCheckout = prompt("Enter new check-out date (YYYY-MM-DD):",
+                                 booking.checkout);
+
+        if (!newCheckout) return;
+
+        let dates = {
+            start: newDate,
+            end: newCheckout,
+            startDate: new Date(newDate + "T00:00:00"),
+            endDate: new Date(newCheckout + "T00:00:00")
+        };
+
+        if (isNaN(dates.startDate) || isNaN(dates.endDate) ||
+            dates.startDate <= new Date(new Date().toDateString()) ||
+            dates.endDate <= dates.startDate ||
+            !isRoomAvailable(booking.room, dates, booking.id)) {
+            alert("Invalid dates or room unavailable.");
+            return;
+        }
+
+        let nights = (dates.endDate - dates.startDate) / 86400000;
+
+        booking.checkin = dates.start;
+        booking.checkout = dates.end;
+        booking.price = nights * rooms[booking.room].price;
+
+        renderBookings();
+        renderAdminBookings();
+        alert("Booking updated successfully.");
+    }
+
+    function renderBookings() {
+        document.getElementById("bookingRows").innerHTML =
+            bookings.map(b => `
+                <tr>
+                    <td>${b.id}</td>
+                    <td>${b.guest}</td>
+                    <td>${b.room}</td>
+                    <td>${b.checkin}</td>
+                    <td>${b.checkout}</td>
+                    <td>₹${b.price}</td>
+                    <td>
+                        ${b.status}
+                        ${b.status === "Confirmed" ? `
+                        <button class="action"
+                            onclick="modifyBooking(${b.id})">Modify</button>
+                        <button class="cancel"
+                            onclick="cancelBooking(${b.id})">Cancel</button>
+                        ` : ""}
+                    </td>
+                </tr>
+            `).join("");
+
+        if (bookings.length === 0) {
+            document.getElementById("bookingRows").innerHTML =
+                "<tr><td colspan='7'>No bookings yet.</td></tr>";
+        }
+    }
+
+    function updateRoom() {
+        let type = document.getElementById("adminRoom").value;
+        let price = Number(document.getElementById("adminPrice").value);
+        let quantity = Number(document.getElementById("adminQuantity").value);
+
+        if (price <= 0 || quantity < 0 ||
+            document.getElementById("adminPrice").value === "" ||
+            document.getElementById("adminQuantity").value === "") {
+            document.getElementById("adminMessage").innerText =
+                "Enter a valid price and room quantity.";
+            return;
+        }
+
+        rooms[type].price = price;
+        rooms[type].quantity = quantity;
+
+        document.getElementById("adminMessage").innerText =
+            type + " room details updated successfully.";
+
+        renderRooms();
+    }
+
+    function renderAdminBookings() {
+        document.getElementById("adminRows").innerHTML =
+            bookings.map(b => `
+                <tr>
+                    <td>${b.id}</td>
+                    <td>${b.guest}</td>
+                    <td>${b.room}</td>
+                    <td>${b.status}</td>
+                    <td>
+                        ${b.status === "Confirmed" ?
+                        `<button class="cancel"
+                            onclick="adminCancel(${b.id})">Cancel Booking</button>`
+                        : "-"}
+                    </td>
+                </tr>
+            `).join("");
+    }
+
+    function adminCancel(id) {
+        let booking = bookings.find(item => item.id === id);
+
+        if (booking) {
+            booking.status = "Cancelled";
+            renderBookings();
+            renderAdminBookings();
+        }
+    }
+
+    function sendContact(event) {
+        event.preventDefault();
+
+        document.getElementById("contactMessage").innerText =
+            "Thank you! Your contact form was submitted for this demo.";
+    }
+
+    renderRooms();
+    renderBookings();
+    renderAdminBookings();
+</script>
+
+</body>
+</html>
