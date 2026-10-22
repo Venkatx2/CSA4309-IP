@@ -1,0 +1,292 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Management System</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #f0f4f8;
+            margin: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: darkblue;
+        }
+
+        h2 {
+            color: navy;
+        }
+
+        button {
+            padding: 8px 12px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        input {
+            padding: 8px;
+            margin: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: lightblue;
+        }
+
+        section {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Library Management System</h1>
+
+    <section>
+        <h2>Search Books</h2>
+        <input type="text" id="search" placeholder="Enter book name">
+        <button onclick="searchBook()">Search</button>
+
+        <table id="bookTable">
+            <tr>
+                <th>Book ID</th>
+                <th>Book Name</th>
+                <th>Author</th>
+                <th>Status</th>
+            </tr>
+            <tr>
+                <td>101</td>
+                <td>Java Programming</td>
+                <td>James Gosling</td>
+                <td>Available</td>
+            </tr>
+            <tr>
+                <td>102</td>
+                <td>Web Technology</td>
+                <td>Jon Duckett</td>
+                <td>Issued</td>
+            </tr>
+            <tr>
+                <td>103</td>
+                <td>Database Systems</td>
+                <td>Raghu Ramakrishnan</td>
+                <td>Available</td>
+            </tr>
+        </table>
+
+        <p id="message"></p>
+    </section>
+
+    <section>
+        <h2>Student Registration</h2>
+
+        <form onsubmit="registerStudent(event)">
+            <input type="text" id="name"
+                   placeholder="Student Name" required>
+
+            <input type="email" id="email"
+                   placeholder="Email" required>
+
+            <input type="text" id="studentId"
+                   placeholder="Student ID" required>
+
+            <button type="submit">Register</button>
+        </form>
+
+        <p id="registerMessage"></p>
+    </section>
+
+    <section>
+        <h2>Login</h2>
+
+        <form onsubmit="login(event)">
+            <input type="email" id="loginEmail"
+                   placeholder="Email" required>
+
+            <input type="password" id="password"
+                   placeholder="Password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p id="loginMessage"></p>
+    </section>
+
+    <section>
+        <h2>Borrowing Details</h2>
+
+        <p>Book: Java Programming</p>
+        <p>Issue Date: 01-10-2026</p>
+        <p>Due Date: 30-10-2026</p>
+
+        <button onclick="calculateFine()">
+            Calculate Fine
+        </button>
+
+        <p id="fine"></p>
+    </section>
+
+    <section>
+        <h2>Librarian / Admin</h2>
+
+        <input type="text" id="newBook"
+               placeholder="Enter new book name">
+
+        <button onclick="addBook()">
+            Add Book
+        </button>
+
+        <p id="adminMessage"></p>
+
+        <h3>Study Materials</h3>
+        <p>HTML Notes - Year 1, Semester 1</p>
+        <p>JavaScript Notes - Year 2, Semester 3</p>
+
+        <button onclick="downloadNotes()">
+            Download Notes
+        </button>
+    </section>
+
+    <section>
+        <h2>Contact Form</h2>
+
+        <form onsubmit="contactLibrary(event)">
+            <input type="text" id="contactName"
+                   placeholder="Your Name" required>
+
+            <input type="email" id="contactEmail"
+                   placeholder="Your Email" required>
+
+            <br>
+
+            <textarea id="contactMessage"
+                      placeholder="Your Message"
+                      required></textarea>
+
+            <br>
+
+            <button type="submit">Send Message</button>
+        </form>
+
+        <p id="contactResult"></p>
+    </section>
+
+    <script>
+        function searchBook() {
+            let input = document.getElementById("search")
+                              .value.toLowerCase();
+
+            let table = document.getElementById("bookTable");
+            let rows = table.getElementsByTagName("tr");
+            let found = false;
+
+            for (let i = 1; i < rows.length; i++) {
+                let bookName = rows[i].cells[1]
+                                   .innerText.toLowerCase();
+
+                if (bookName.includes(input)) {
+                    rows[i].style.display = "";
+                    found = true;
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+
+            document.getElementById("message").innerText =
+                found ? "Book found." : "No book found.";
+        }
+
+        function registerStudent(event) {
+            event.preventDefault();
+
+            let name = document.getElementById("name").value;
+
+            document.getElementById("registerMessage").innerText =
+                "Registration successful for " + name;
+        }
+
+        function login(event) {
+            event.preventDefault();
+
+            document.getElementById("loginMessage").innerText =
+                "Demo login form submitted successfully.";
+        }
+
+        function calculateFine() {
+            let finePerDay = 5;
+            let lateDays = 3;
+            let totalFine = finePerDay * lateDays;
+
+            document.getElementById("fine").innerText =
+                "Fine Amount: Rs. " + totalFine;
+        }
+
+        function addBook() {
+            let name = document.getElementById("newBook").value;
+
+            if (name.trim() === "") {
+                alert("Please enter a book name");
+                return;
+            }
+
+            let table = document.getElementById("bookTable");
+            let row = table.insertRow();
+
+            row.insertCell(0).innerText = table.rows.length + 99;
+            row.insertCell(1).innerText = name;
+            row.insertCell(2).innerText = "Unknown";
+            row.insertCell(3).innerText = "Available";
+
+            document.getElementById("adminMessage").innerText =
+                "Book added successfully.";
+
+            document.getElementById("newBook").value = "";
+        }
+
+        function downloadNotes() {
+            let content =
+                "LIBRARY STUDY MATERIALS\n\n" +
+                "HTML Notes - Year 1, Semester 1\n" +
+                "JavaScript Notes - Year 2, Semester 3";
+
+            let file = new Blob([content], {
+                type: "text/plain"
+            });
+
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(file);
+            link.download = "LibraryNotes.txt";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function contactLibrary(event) {
+            event.preventDefault();
+
+            document.getElementById("contactResult").innerText =
+                "Thank you! Your message was submitted for this demo.";
+        }
+    </script>
+
+</body>
+</html>
+
